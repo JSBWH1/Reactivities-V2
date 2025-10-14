@@ -1,15 +1,18 @@
 import { Paper, Typography, Box, TextField, Button } from "@mui/material";
 import type { FormEvent } from "react";
+import { useActivities } from "../../../lib/hooks/useActivities";
+import { create } from "@mui/material/styles/createTransitions";
 
 type Props = {   
     activity?: Activity; // activity is optional because when creating a new activity there is no existing activity to pass in
     closeForm: () => void;
-    submitForm: (activity: Activity) => void;
 }
 
-export default function ActivityForm({activity, closeForm, submitForm}: Props) {
+export default function ActivityForm({activity, closeForm }: Props) {
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const { updateActivity, createActivity } = useActivities();
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
@@ -19,9 +22,17 @@ export default function ActivityForm({activity, closeForm, submitForm}: Props) {
             data[key] = value;
         });
 
-        if(activity) data.id = activity.id; // if we are editing an existing activity we need to keep the id the same
-        
-        submitForm(data as unknown as Activity);
+        if(activity) {
+           data.id = activity.id; // if we are editing an existing activity we need to keep the id the same 
+           await updateActivity.mutateAsync(data as unknown as Activity);
+           // update the existing activity from the form
+           closeForm();
+        } else {
+              await createActivity.mutateAsync(data as unknown as Activity);
+              // create a new activity from the form. The backend will generate a new id for this activity
+              closeForm(); 
+        }
+
     }
 
   return (
@@ -33,12 +44,22 @@ export default function ActivityForm({activity, closeForm, submitForm}: Props) {
             <TextField name="title" label="title" defaultValue={activity?.title} />
             <TextField name="description" label="Description" defaultValue={activity?.description} multiline rows={3} />
             <TextField name="category" label="Category" defaultValue={activity?.category} />
-            <TextField name="date" label="Date" defaultValue={activity?.date} type="date" />
+            <TextField name="date" label="Date" type="date"
+                defaultValue={activity?.date 
+                    ? new Date(activity.date).toISOString().split('T')[0] 
+                    : new Date().toISOString().split('T')[0]
+                }  
+            />
             <TextField name="city" label="City" defaultValue={activity?.city} />
             <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
             <Box display="flex" justifyContent="end" gap={3}>
                 <Button onClick={closeForm} color="inherit">Cancel</Button>
-                <Button type="submit" color="success" variant="contained">Submit</Button>
+                <Button 
+                    type="submit" 
+                    color="success" 
+                    variant="contained"
+                    disabled={updateActivity.isPending || createActivity.isPending}
+                >Submit</Button>
             </Box>
         </Box>
         
