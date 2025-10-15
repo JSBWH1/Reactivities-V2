@@ -1,16 +1,14 @@
 import { Paper, Typography, Box, TextField, Button } from "@mui/material";
 import type { FormEvent } from "react";
 import { useActivities } from "../../../lib/hooks/useActivities";
-import { create } from "@mui/material/styles/createTransitions";
+import { useNavigate, useParams } from "react-router";
 
-type Props = {   
-    activity?: Activity; // activity is optional because when creating a new activity there is no existing activity to pass in
-    closeForm: () => void;
-}
 
-export default function ActivityForm({activity, closeForm }: Props) {
+export default function ActivityForm() {
 
-    const { updateActivity, createActivity } = useActivities();
+    const {id} = useParams();
+    const { updateActivity, createActivity, activity, isLoadingActivity } = useActivities(id);
+    const navigate = useNavigate(); 
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -26,19 +24,24 @@ export default function ActivityForm({activity, closeForm }: Props) {
            data.id = activity.id; // if we are editing an existing activity we need to keep the id the same 
            await updateActivity.mutateAsync(data as unknown as Activity);
            // update the existing activity from the form
-           closeForm();
+           navigate(`/activities/${activity.id}`)
         } else {
-              await createActivity.mutateAsync(data as unknown as Activity);
+              createActivity.mutate(data as unknown as Activity, {
+                onSuccess : (id) => {
+                    navigate(`/activities/${id}`)
+                }
+              });
               // create a new activity from the form. The backend will generate a new id for this activity
-              closeForm(); 
         }
 
     }
 
+    if (isLoadingActivity) return <Typography>Loading activity...</Typography>
+
   return (
     <Paper sx={{borderRadius: 3, padding: 3}}>
         <Typography variant="h5" gutterBottom color="primary">
-            Create Activity
+            {activity ? 'Edit activity' : 'Create activity'}
         </Typography>
         <Box component="form" onSubmit={handleSubmit} display="flex" flexDirection="column" gap={3}>
             <TextField name="title" label="title" defaultValue={activity?.title} />
@@ -53,7 +56,7 @@ export default function ActivityForm({activity, closeForm }: Props) {
             <TextField name="city" label="City" defaultValue={activity?.city} />
             <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
             <Box display="flex" justifyContent="end" gap={3}>
-                <Button onClick={closeForm} color="inherit">Cancel</Button>
+                <Button color="inherit">Cancel</Button>
                 <Button 
                     type="submit" 
                     color="success" 
