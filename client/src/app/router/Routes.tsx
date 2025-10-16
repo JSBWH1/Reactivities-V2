@@ -3,7 +3,7 @@ import App from "../layout/App";
 import HomePage from "../../features/home/HomePage";
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
 import ActivityForm from "../../features/activities/form/ActivityForm";
-import ActivityDetail from "../../features/activities/details/ActivityDetail";
+import ActivityDetailPage from "../../features/activities/details/ActivityDetailPage";
 
 // Define the routes for the application
 // The main route '/' uses the App component which contains a NavBar and an Outlet for nested routes
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
         children: [
             { path: '/', element: <HomePage /> },
             { path: 'activities', element: <ActivityDashboard /> },
-            { path: 'activities/:id', element: <ActivityDetail /> },
+            { path: 'activities/:id', element: <ActivityDetailPage /> },
             { path: 'createActivity', element: <ActivityForm key='create' /> },
             { path: 'manage/:id', element: <ActivityForm /> }
         ]
