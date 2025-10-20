@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import agent from "../api/agent"; // our axios instance (instead of writing axios.get followed by a full http address, we can just write agent.get followed by the endpoint we want to access)
+import { useLocation } from "react-router";
 
 
 export const useActivities = (id?: string) => {
@@ -7,13 +8,15 @@ export const useActivities = (id?: string) => {
     // have to use ? on the id parameter to make it optional, otherwise we get an error when we try to use this hook in components that don't pass an id (like ActivityDashboard)
 
     const queryClient = useQueryClient();
+    const location = useLocation();
 
     const {data: activities, isPending} = useQuery({
         queryKey: ['activities'],
         queryFn: async () => {
             const response = await agent.get<Activity[]>('/activities');
             return response.data;
-        }
+        },
+        enabled: !id && location.pathname === '/activities'
     });
     
     const {data: activity, isLoading: isLoadingActivity } = useQuery({

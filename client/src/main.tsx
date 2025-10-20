@@ -9,15 +9,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from 'react-router';
 import { router } from './app/router/Routes.tsx';
+import { store, StoreContext } from './lib/stores/store.ts';
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools />
-    <RouterProvider router={router} />
-    </QueryClientProvider>
+    <StoreContext.Provider value={store}>
+      <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools />
+        <RouterProvider router={router} />
+      </QueryClientProvider>  
+    </StoreContext.Provider>
   </StrictMode>,
 )
 
@@ -42,5 +45,6 @@ This page essentially is the entry point for our react application. Its role is 
 -- This is because we will be using react-router-dom to manage multiple pages in our application. 
 -- The goal is that the router provider will provide an outlet for our app component to be rendered in. (so in our app component we will have an <Outlet /> component where the app component will be rendered.)
 -- The outlet component is a placeholder that will be filled with the app component when the route is matched. Example, if the user tries to load up the page to see their own user profile, the router will match the route and render the app component in the outlet.
+
 
 */ 
