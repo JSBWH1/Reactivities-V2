@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import agent from "../api/agent"; // our axios instance (instead of writing axios.get followed by a full http address, we can just write agent.get followed by the endpoint we want to access)
 import { useLocation } from "react-router";
+import { useAccount } from "./useAccount";
+import type { Activity } from "../types";
 
 
 export const useActivities = (id?: string) => {
@@ -8,15 +10,16 @@ export const useActivities = (id?: string) => {
     // have to use ? on the id parameter to make it optional, otherwise we get an error when we try to use this hook in components that don't pass an id (like ActivityDashboard)
 
     const queryClient = useQueryClient();
+    const {currentUser} = useAccount();
     const location = useLocation();
 
-    const {data: activities, isPending} = useQuery({
+    const {data: activities, isLoading} = useQuery({
         queryKey: ['activities'],
         queryFn: async () => {
             const response = await agent.get<Activity[]>('/activities');
             return response.data;
         },
-        enabled: !id && location.pathname === '/activities'
+        enabled: !id && location.pathname === '/activities' && !!currentUser 
     });
     
     const {data: activity, isLoading: isLoadingActivity } = useQuery({
@@ -25,7 +28,7 @@ export const useActivities = (id?: string) => {
             const response = await agent.get<Activity>(`/activities/${id}`);
             return response.data;
         },
-        enabled: !!id // only run this query if id is truthy (i.e., not null or undefined). Basically, if we have an id, then run this query, otherwise don't
+        enabled: !!id && !!currentUser // only run this query if id is truthy (i.e., not null or undefined). Basically, if we have an id, then run this query, otherwise don't
         // essentially, putting this here stops this query from running when we don't have an id (like in ActivityDashboard component)
     }) 
 
@@ -69,6 +72,6 @@ export const useActivities = (id?: string) => {
     })
 
 
-    return { activities, isPending, updateActivity, createActivity, deleteActivity, activity, isLoadingActivity }; 
+    return { activities, isLoading, updateActivity, createActivity, deleteActivity, activity, isLoadingActivity }; 
 
 }

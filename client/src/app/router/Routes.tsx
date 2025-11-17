@@ -8,6 +8,9 @@ import Counter from "../../features/counter/Counter";
 import TestErrors from "../../features/errors/TestErrors";
 import NotFound from "../../features/errors/NotFound";
 import ServerError from "../../features/errors/ServerError";
+import LoginForm from "../../features/account/LoginForm";
+import RequireAuth from "./RequireAuth";
+import RegisterForm from "../../features/account/RegisterForm";
 
 // Define the routes for the application
 // The main route '/' uses the App component which contains a NavBar and an Outlet for nested routes
@@ -18,15 +21,19 @@ export const router = createBrowserRouter([
         path: '/',
         element: <App />,
         children: [
-            { path: '/', element: <HomePage /> },
+            { element: <RequireAuth />, children: [
             { path: 'activities', element: <ActivityDashboard /> },
             { path: 'activities/:id', element: <ActivityDetailPage /> },
             { path: 'createActivity', element: <ActivityForm key='create' /> },
             { path: 'manage/:id', element: <ActivityForm /> },
+            ]},
+            { path: '/', element: <HomePage /> },
             { path: 'counter', element: <Counter /> },
             { path: 'errors', element: <TestErrors />},
             { path: 'not-found', element: <NotFound />},
             { path: 'server-error', element: <ServerError />},
+            { path: 'Login', element: <LoginForm />},
+            { path: 'Register', element: <RegisterForm />},
             { path: '*', element: <Navigate replace to='/not-found' />}
         ]
     }

@@ -11,9 +11,11 @@ const sleep = (delay: number) => {
 
 
 const agent = axios .create({
-    baseURL: import.meta.env.VITE_API_URL
+    baseURL: import.meta.env.VITE_API_URL, 
     // Grabs our base URL from the environment variable we set up in the .env.development file
     // this way we don't have to hardcode the base URL here, making it easier to change if needed
+    withCredentials: true
+    // now it grabs cookies from the backend API on requests (for authentication purposes)
 }); 
 
 
